@@ -1,0 +1,10 @@
+fastapi>=0.110
+uvicorn>=0.29
+# 자막 폭 측정(PIL ImageFont)에 사용. 없으면 근사 계산으로 대체된다.
+Pillow>=10.0
+
+# --- 선택 ---
+# 가사-음성 싱크 분석(보컬맵): pip install faster-whisper==1.2.1
+#
+# 배경 이미지 생성(sd_worker.py)은 torch + diffusers 가 필요하므로
+# 본앱 venv 에는 넣지 않고, 별도 파이썬을 config 의 sd_venv_python 에 지정한다.

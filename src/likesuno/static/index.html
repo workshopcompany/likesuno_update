@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>likesuno — YuE2 음악 생성</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo"><span class="grad">like</span>suno<span class="tag">YuE2 · GTX 1080 Ti</span></div>
+  <div id="gpu-badge" class="badge">GPU 확인 중…</div>
+</header>
+
+<main>
+  <div class="left">
+  <section class="panel create">
+    <h2>만들기</h2>
+
+    <label>곡 제목 <span class="hint">비워두면 가사 첫 줄에서 자동 생성</span></label>
+    <input id="title" type="text" placeholder="예: 아침빛 세레나데" class="grow" style="width:100%;margin-bottom:10px">
+
+    <label>스타일 프롬프트</label>
+    <textarea id="style" rows="2" placeholder="예: Korean, indie pop, warm acoustic guitar, soft drums, emotional female vocal"></textarea>
+    <div class="chips">
+      <button class="chip" data-style="Korean, indie pop, warm acoustic guitar, soft drums, emotional female vocal">인디 팝</button>
+      <button class="chip" data-style="Korean, sentimental ballad, piano, strings, powerful male vocal">발라드</button>
+      <button class="chip" data-style="Korean, energetic rock, distorted guitar, punchy drums, male vocal">락</button>
+      <button class="chip" data-style="Korean, lofi hiphop, mellow beat, jazzy keys, laid back vocal">힙합</button>
+      <button class="chip" data-style="Korean, bright synth pop, catchy melody, dance beat, female vocal">신스팝</button>
+      <button class="chip" data-style="Korean, city pop, funky bass, warm brass, smooth vocal">시티팝</button>
+    </div>
+
+    <label>가사 <span class="hint">[Verse] / [Chorus] 섹션 태그 사용 권장 · 한국어 가능</span></label>
+    <textarea id="lyrics" rows="9" placeholder="[Verse]&#10;창문 너머 아침 빛이 스며들어&#10;도시는 잠에서 깨어나&#10;&#10;[Chorus]&#10;리듬에 몸을 맡기고&#10;함께라면 우리는 혼자가 아니야"></textarea>
+    <div class="row">
+      <button id="btn-template" class="ghost">가사 템플릿</button>
+      <span class="hint" id="lyrics-len">0 자</span>
+    </div>
+
+    <div class="grid3">
+      <div>
+        <label>CoT 모드</label>
+        <select id="cot">
+          <option value="off" selected>끄기 (빠름)</option>
+          <option value="melody">멜로디 계획</option>
+          <option value="full">전체 계획 + 악보 (느림)</option>
+        </select>
+      </div>
+      <div>
+        <label>양자화</label>
+        <select id="quant">
+          <option value="q8_0" selected>Q8_0 (음질, 4.3GB)</option>
+          <option value="q4_0">Q4_0 (빠름, 2.7GB)</option>
+        </select>
+      </div>
+      <div>
+        <label>스텝</label>
+        <input id="steps" type="number" min="1" max="32" value="8">
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="inline">시드</label>
+      <input id="seed" type="text" placeholder="비워두면 랜덤" class="grow">
+      <button id="btn-rand" class="ghost">🎲</button>
+    </div>
+
+    <details>
+      <summary>고급 설정</summary>
+      <div class="row">
+        <label class="inline">Guidance scale</label>
+        <input id="gs" type="number" step="0.01" min="0" max="20" placeholder="기본값 사용">
+      </div>
+    </details>
+
+    <button id="btn-gen" class="primary">🎵 곡 생성</button>
+    <p class="note">⚠️ 1080 Ti 기준: 짧은 곡(cot=off) 수 분 ~ 수십 분 소요. 첫 실행은 모델 로딩에 추가 시간이 걸립니다.</p>
+  </section>
+
+    <section class="panel">
+      <h2>🖼️ 배경 이미지</h2>
+      <div class="hint" style="margin:0 0 8px">라이브러리에서 만든 곡에 어울리는 배경을 만드세요. MP4(세로/가로) 변환 시 선택한 이미지가 배경으로 들어갑니다.</div>
+      <div class="row">
+        <label class="inline">곡</label>
+        <select id="img-job" class="grow"><option value="">곡을 선택하세요</option></select>
+      </div>
+      <div class="row">
+        <label class="inline">방향</label>
+        <select id="img-orient">
+          <option value="portrait">세로 (쇼츠 9:16)</option>
+          <option value="landscape">가로 (16:9)</option>
+        </select>
+        <label class="inline">장수</label>
+        <select id="img-count">
+          <option>1</option><option selected>3</option><option>4</option><option>6</option>
+        </select>
+      </div>
+      <div class="row">
+        <button id="img-auto" class="ghost">✨ 노래 맞춤 자동 생성</button>
+      </div>
+      <details>
+        <summary>직접 프롬프트 입력</summary>
+        <textarea id="img-prompt" rows="3" placeholder="예: a calm night ocean under moonlight, deep blue and purple gradient, dreamy, cinematic, no people, no text"></textarea>
+        <div class="row">
+          <button id="img-manual" class="ghost">🖌️ 이 프롬프트로 생성</button>
+        </div>
+      </details>
+      <div class="hint" id="img-status" style="margin-top:8px"></div>
+      <div id="img-grid" class="img-grid"></div>
+      <div class="row">
+        <button id="img-apply" class="ghost">✅ 선택 이미지를 MP4 배경으로 적용</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="right">
+    <section class="panel" id="status-panel" hidden>
+      <h2>진행 상태</h2>
+      <div id="status-body">
+        <div class="spinner"></div>
+        <div id="status-text">대기 중…</div>
+      </div>
+      <pre id="status-log"></pre>
+    </section>
+
+    <section class="panel">
+      <h2>라이브러리</h2>
+      <div id="library" class="library"><div class="empty">아직 생성된 곡이 없습니다.</div></div>
+    </section>
+
+    <section class="panel">
+      <details id="rec-panel">
+        <summary>🎙️ 태그 만들기 (내 목소리 녹음)</summary>
+        <div class="row">
+          <button id="rec-start" class="ghost">🔴 녹음 시작</button>
+          <button id="rec-stop" class="ghost" disabled>⏹ 정지</button>
+          <button id="rec-preview" class="ghost" disabled style="display:none">👂 미리듣기</button>
+          <button id="rec-del" class="ghost" disabled>🗑 버리기</button>
+        </div>
+        <div class="row">
+          <label class="inline">이름</label>
+          <input id="rec-name" type="text" placeholder="예: Made by KKK3" class="grow">
+          <button id="rec-save" class="ghost" disabled>💾 저장</button>
+        </div>
+        <div class="hint" id="rec-status">마이크로 "Made by ..." 태그를 녹음해 저장하세요. 저장하면 곡의 태그 목록에 자동 추가됩니다.</div>
+        <audio id="rec-audio" controls preload="none" style="display:none;width:100%"></audio>
+      </details>
+    </section>
+  </section>
+</main>
+
+<footer>likesuno · YuE2-3B GGUF (audio.cpp) · 로컬 전용 · 모델 가중치 CC BY-NC 4.0 (비영리)</footer>
+<script src="app.js?v=20260920f"></script>
+</body>
+</html>

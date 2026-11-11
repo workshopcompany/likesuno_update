@@ -1,0 +1,36 @@
+{
+  "host": "127.0.0.1",
+  "port": 8560,
+  "data_root": "",
+  "sd_venv_python": "",
+  "sd_model": "",
+  "sd_steps": 8,
+  "runtime_root": "runtime/audio.cpp",
+  "model_dir": "models/Yue2-3B-GGUF",
+  "input_dir": "input",
+  "output_dir": "output",
+  "jobs_dir": "jobs",
+  "logs_dir": "logs",
+  "backend": "cuda",
+  "threads": 8,
+  "defaults": {
+    "cot": "off",
+    "num_inference_steps": 8,
+    "quantization": "q8_0",
+    "vae_gguf": "yue2-vae-f16.gguf",
+    "guidance_scale": null
+  },
+  "quantization_map": {
+    "q8_0": "yue2-3b-q8_0.gguf",
+    "q4_0": "yue2-3b-q4_0.gguf"
+  },
+  "session_options": {
+    "yue2.model_weight_context_mb": 2048,
+    "yue2.vae_weight_context_mb": 512,
+    "yue2.ar_prefill_graph_arena_mb": 2560,
+    "yue2.ar_decode_graph_arena_mb": 1280,
+    "yue2.nar_graph_arena_mb": 4096,
+    "yue2.vae_graph_arena_mb": 1024
+  },
+  "max_log_tail": 60
+}
